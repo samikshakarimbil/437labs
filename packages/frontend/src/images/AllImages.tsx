@@ -1,13 +1,15 @@
-import { useState } from "react";
-import { fetchDataFromServer } from "../MockAppData.ts";
 import { ImageGrid } from "./ImageGrid.tsx";
 
-export function AllImages() {
-    const [imageData, _setImageData] = useState(fetchDataFromServer);
+// Define props interface to receive data from App
+interface AllImagesProps {
+    images: any[]; // Use the same type as your imageData
+}
+
+export function AllImages({ images }: AllImagesProps) {
     return (
         <>
             <h2>All Images</h2>
-            <ImageGrid images={imageData} />
+            <ImageGrid images={images} />
         </>
     );
 }
