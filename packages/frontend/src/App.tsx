@@ -3,17 +3,19 @@ import { ImageDetails } from "./images/ImageDetails.tsx";
 import { UploadPage } from "./UploadPage.tsx";
 import { LoginPage } from "./LoginPage.tsx";
 import { Routes, Route } from "react-router-dom";
+import { MainLayout } from "./MainLayout";
 
 function App() {
     return (
         <Routes>
-            <Route path="/" element={<AllImages />} />
-            <Route path="/upload" element={<UploadPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/images/:id" element={<ImageDetails />} />
+            <Route path="/" element={<MainLayout />}>
+                <Route index element={<AllImages />} />
+                <Route path="upload" element={<UploadPage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="images/:id" element={<ImageDetails />} />
+            </Route>
         </Routes>
     );
-    
 }
 
 export default App;
