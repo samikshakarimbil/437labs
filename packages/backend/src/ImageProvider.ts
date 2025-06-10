@@ -1,4 +1,5 @@
 import { MongoClient, Collection, ObjectId } from "mongodb";
+import type { IAuthTokenPayload } from "routes/authRoutes";
 
 interface IImageDocument {
   _id: ObjectId;
@@ -24,42 +25,51 @@ export class ImageProvider {
       throw new Error("Missing collection name(s) in .env");
     }
 
-    this.imageCollection = this.mongoClient.db().collection<IImageDocument>(imagesName);
-    this.userCollection = this.mongoClient.db().collection<IUserDocument>(usersName);
+    this.imageCollection = this.mongoClient
+      .db()
+      .collection<IImageDocument>(imagesName);
+    this.userCollection = this.mongoClient
+      .db()
+      .collection<IUserDocument>(usersName);
   }
 
   async getAllImages(search?: string) {
-    const filter = search
-      ? { name: { $regex: search, $options: "i" } } 
-      : {};
+    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
     const images = await this.imageCollection.find(filter).toArray();
 
-    const userIds = images.map(img => img.authorId); 
+    const userIds = images.map((img) => img.authorId);
     const users = await this.userCollection
       .find({ _id: { $in: userIds } })
       .toArray();
 
-      const userMap = Object.fromEntries(
-        users.map((user) => [user._id.toString(), user])
-      );
+    const userMap = Object.fromEntries(
+      users.map((user) => [user._id.toString(), user])
+    );
 
     // assemble final image objects with author info
-    return images.map(img => ({
+    return images.map((img) => ({
       id: img._id.toString(),
       src: img.src,
       name: img.name,
       author: {
-        username: userMap[img.authorId]?.username || "Unknown"
-      }
+        username: userMap[img.authorId]?.username || "Unknown",
+      },
     }));
   }
 
   async updateImageName(imageId: string, newName: string): Promise<number> {
     const result = await this.imageCollection.updateOne(
-        { _id: new ObjectId(imageId) },
-        { $set: { name: newName } }
+      { _id: new ObjectId(imageId) },
+      { $set: { name: newName } }
     );
     return result.matchedCount;
-}
-
+  }
+  async checkAuthor(reqUser: IAuthTokenPayload, imgId: string) {
+    const result = await this.imageCollection.findOne({ id: imgId });
+    if (result) {
+      if (result.authorId === reqUser.username) {
+        return true;
+      }
+    } else return false;
+  }
 }

@@ -43,3 +43,39 @@ Content-Type: application/json
 # Request body separated from headers by newline
 
 { "a": 1, "b": 2 }
+
+### New user registration
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{ "username": "newuser", "password": "password" }
+
+### testing user registration with existing
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{ "username": "newuser", "password": "password" }
+
+### testing bad user registration
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{ "username": "pp" }
+
+### user login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "username": "newuser", "password": "password" }
+
+### wrong pw login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "username": "newuser", "password": "passord" }
+
+### bad login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "username": "", "password": "" }
