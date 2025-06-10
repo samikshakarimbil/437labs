@@ -2,10 +2,12 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import { ValidRoutes } from "./shared/ValidRoutes.js";
-import { fetchDataFromServer } from "./shared/ApiImageData"
-
+import { connectMongo } from "./connectMongo";
+import { ImageProvider } from "./ImageProvider";
 
 dotenv.config()
+
+const mongoClient = connectMongo();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,11 +21,15 @@ app.get("/api/hello", (req, res) => {
 
 app.get("/api/images", async (req, res) => {
   function waitDuration(numMs: number): Promise<void> {
-      return new Promise(resolve => setTimeout(resolve, numMs));
+    return new Promise(resolve => setTimeout(resolve, numMs));
   }
-  waitDuration(1500).then(() => {res.send(fetchDataFromServer())})
 
+  const provider = new ImageProvider(mongoClient);
+  const data = await provider.getAllImages();
+  await waitDuration(1500);
+  res.send(data);
 });
+
   
 app.get(Object.values(ValidRoutes), (req, res) => {
   res.sendFile("index.html", { root: STATIC_DIR });
