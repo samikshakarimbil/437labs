@@ -1,0 +1,45 @@
+### Get all images
+# This is a comment
+GET http://localhost:3000/api/images
+
+### to search for image
+GET http://localhost:3000/api/images/search?query=Shiba
+
+### edit image name
+PUT http://localhost:3000/api/images/68479db83c3deb3c89e65882
+Content-Type: application/json
+
+{ "name": "name" }
+
+### 1. using an invalid object id
+PUT http://localhost:3000/api/images/invalidObjectId123
+Content-Type: application/json
+
+{
+  "name": "New Name"
+}
+
+### 2. using wrong field
+PUT http://localhost:3000/api/images/64c1a837f0c9f5c8a3d3e001
+Content-Type: application/json
+
+{
+  "wrongField": "Oops"
+}
+
+### 3. using too long name
+PUT http://localhost:3000/api/images/64c1a837f0c9f5c8a3d3e001
+Content-Type: application/json
+
+{
+  "name": "hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+}
+
+
+### A second example.  Each request must be delimited by a triple hash
+POST http://localhost:3000/api/test
+Content-Type: application/json 
+# Content-Type header is a must if you're sending JSON
+# Request body separated from headers by newline
+
+{ "a": 1, "b": 2 }

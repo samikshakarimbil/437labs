@@ -28,24 +28,22 @@ export class ImageProvider {
     this.userCollection = this.mongoClient.db().collection<IUserDocument>(usersName);
   }
 
-  async getAllImages() {
-    const images = await this.imageCollection.find().toArray();
+  async getAllImages(search?: string) {
+    const filter = search
+      ? { name: { $regex: search, $options: "i" } } 
+      : {};
+    const images = await this.imageCollection.find(filter).toArray();
 
-    // Step 1: get all unique authorIds from images
-    const authorIds = [...new Set(images.map(img => img.authorId))];
-
-    // Step 2: fetch users by those IDs
+    const userIds = images.map(img => img.authorId); 
     const users = await this.userCollection
-      .find({ _id: { $in: authorIds } })
+      .find({ _id: { $in: userIds } })
       .toArray();
 
-    // Step 3: create lookup table
-    const userMap: Record<string, IUserDocument> = {};
-    for (const user of users) {
-      userMap[user._id] = user;
-    }
+      const userMap = Object.fromEntries(
+        users.map((user) => [user._id.toString(), user])
+      );
 
-    // Step 4: assemble final image objects with author info
+    // assemble final image objects with author info
     return images.map(img => ({
       id: img._id.toString(),
       src: img.src,
@@ -55,4 +53,13 @@ export class ImageProvider {
       }
     }));
   }
+
+  async updateImageName(imageId: string, newName: string): Promise<number> {
+    const result = await this.imageCollection.updateOne(
+        { _id: new ObjectId(imageId) },
+        { $set: { name: newName } }
+    );
+    return result.matchedCount;
+}
+
 }
