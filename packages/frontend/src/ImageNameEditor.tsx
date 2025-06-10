@@ -17,7 +17,6 @@ export function ImageNameEditor(props: INameEditorProps) {
         setIsLoading(true);
         setHasError(false);
         try {
-          // ✅ Step 1: Send PUT request to backend
           const updateResponse = await fetch(`/api${ValidRoutes.IMAGES}/${props.imageId}`, {
             method: "PUT",
             headers: {
@@ -33,7 +32,6 @@ export function ImageNameEditor(props: INameEditorProps) {
             return;
           }
       
-          // ✅ Step 2: Fetch updated image data
           const response = await fetch(`/api${ValidRoutes.IMAGES}`);
           if (response.status >= 400) {
             setHasError(true);
