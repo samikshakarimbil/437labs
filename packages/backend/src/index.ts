@@ -2,7 +2,8 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import { ValidRoutes } from "./shared/ValidRoutes.js";
-import { IMAGES } from "./shared/ApiImageData";
+import { fetchDataFromServer } from "./shared/ApiImageData"
+
 
 dotenv.config()
 
@@ -10,25 +11,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const STATIC_DIR = process.env.STATIC_DIR || "public";
 
-// Serve static files from React build
 app.use(express.static(STATIC_DIR));
 
-// Your existing hello route
 app.get("/api/hello", (req, res) => {
   res.send("Hello world");
 });
 
-app.get("/api/images", (req, res) => {
-    res.json(IMAGES);
-  });
+app.get("/api/images", async (req, res) => {
+  function waitDuration(numMs: number): Promise<void> {
+      return new Promise(resolve => setTimeout(resolve, numMs));
+  }
+  waitDuration(1500).then(() => {res.send(fetchDataFromServer())})
 
+});
   
-
 app.get(Object.values(ValidRoutes), (req, res) => {
   res.sendFile("index.html", { root: STATIC_DIR });
 });
 
-// Also handle the dynamic image details route (/images/:id)
 app.get("/images/:id", (req, res) => {
   res.sendFile(path.join(__dirname, "..", STATIC_DIR, "index.html"));
 });

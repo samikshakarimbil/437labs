@@ -64,5 +64,3 @@ export function fetchDataFromServer() {
     console.log("Fetching data x" + fetchCount);
     return IMAGES;
 }
-
-export { IMAGES };
