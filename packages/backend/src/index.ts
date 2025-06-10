@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import { ValidRoutes } from "./shared/ValidRoutes.js";
+import { IMAGES } from "./shared/ApiImageData";
 
 dotenv.config()
 
@@ -13,12 +14,15 @@ const STATIC_DIR = process.env.STATIC_DIR || "public";
 app.use(express.static(STATIC_DIR));
 
 // Your existing hello route
-app.get("/hello", (req, res) => {
+app.get("/api/hello", (req, res) => {
   res.send("Hello world");
 });
 
-// Handle all valid routes by serving the main index.html
-// React Router will handle the client-side routing
+app.get("/api/images", (req, res) => {
+    res.json(IMAGES);
+  });
+
+  
 
 app.get(Object.values(ValidRoutes), (req, res) => {
   res.sendFile("index.html", { root: STATIC_DIR });
