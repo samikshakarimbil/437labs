@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AllImages } from "./images/AllImages.tsx";
 import { ImageDetails } from "./images/ImageDetails.tsx";
@@ -7,15 +7,46 @@ import { LoginPage } from "./LoginPage.tsx";
 import { MainLayout } from "./MainLayout";
 import type { IApiImageData } from "../../backend/src/shared/ApiImageData.ts";
 import { ValidRoutes } from "../../backend/src/shared/ValidRoutes.ts";
+import { ImageSearchForm } from "./images/ImageSearchForm.tsx";
 
 function App() {
   const [imageData, setImageData] = useState<IApiImageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  function handleNameChange(updatedData: IApiImageData[]){
-    setImageData([...updatedData])
-  }
+  const reqId = useRef(0)
+
+  function handleImageSearch() {
+    reqId.current = reqId.current + 1;
+    const id = reqId.current;
+    setIsLoading(true);
+    fetch(`/api/images?name=${searchQuery}`).then(r => {
+        if (!r.ok) {
+            setHasError(true);
+            return;
+        }
+        r.json().then((data) => {
+            if (id === reqId.current) {
+                setImageData(data)
+
+            }
+        })
+    }).then(() => {
+      setHasError(false)
+    }
+    ).catch(() => {
+      setHasError(true)
+    }).finally(() => {
+      setIsLoading(false);
+    })
+
+}
+const searchPanel = <ImageSearchForm searchString={searchQuery} onSearchStringChange={setSearchQuery} onSearchRequested={handleImageSearch}/>
+
+    function handleNameChange(updatedData: IApiImageData[]){
+      setImageData([...updatedData])
+    }
 
   useEffect(() => {
     fetch(`/api${ValidRoutes.IMAGES}`)
@@ -50,6 +81,7 @@ function App() {
               images={imageData}
               isLoading={isLoading}
               hasError={hasError}
+              searchPanel={searchPanel}
             />
           }
         />

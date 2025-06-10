@@ -17,37 +17,45 @@ export function ImageNameEditor(props: INameEditorProps) {
         setIsLoading(true);
         setHasError(false);
         try {
-            const response = await fetch(`/api${ValidRoutes.IMAGES}`);
-
-            if (response.status >= 400) {
-                setHasError(true);
-                return;
-            }
-
-            const parsed: IApiImageData[] = await response.json();
-
-            // Directly mutates parsed array
-            const toEdit = parsed.find(img => img.id === props.imageId);
-
-            if (toEdit) {
-                toEdit.name = input;
-                props.onChange(parsed);
-            }
-
-            //Reset states once request is done
-            setIsLoading(false);
-            setIsEditingName(false);
-            setInput("");
-
-        } 
-        catch (error) {
+          // ✅ Step 1: Send PUT request to backend
+          const updateResponse = await fetch(`/api${ValidRoutes.IMAGES}/${props.imageId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name: input }),
+          });
+      
+          if (!updateResponse.ok) {
+            const err = await updateResponse.json();
+            console.error("Error updating name:", err);
             setHasError(true);
-            console.log(error)
-            setIsLoading(false);
-            setIsEditingName(false);
-            setInput("");
-        } 
-    }
+            return;
+          }
+      
+          // ✅ Step 2: Fetch updated image data
+          const response = await fetch(`/api${ValidRoutes.IMAGES}`);
+          if (response.status >= 400) {
+            setHasError(true);
+            return;
+          }
+      
+          const parsed: IApiImageData[] = await response.json();
+          props.onChange(parsed);
+      
+          setIsLoading(false);
+          setIsEditingName(false);
+          setInput("");
+      
+        } catch (error) {
+          setHasError(true);
+          console.log(error);
+          setIsLoading(false);
+          setIsEditingName(false);
+          setInput("");
+        }
+      }
+      
 
 
     if (isEditingName) {
