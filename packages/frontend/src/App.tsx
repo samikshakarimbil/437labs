@@ -17,7 +17,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [token, setToken] = useState("");
 
-  const reqId = useRef(0)
+  const reqId = useRef(0);
 
   const location = useLocation();
 
@@ -31,8 +31,8 @@ function App() {
     setIsLoading(true);
     fetch("/api/images", {
       headers: {
-        Authorization: `Bearer ${authToken}`
-      }
+        Authorization: `Bearer ${authToken}`,
+      },
     })
       .then((res) => {
         if (!res.ok) {
@@ -52,7 +52,6 @@ function App() {
         setIsLoading(false);
       });
   }
-  
 
   function handleImageSearch() {
     reqId.current = reqId.current + 1;
@@ -60,66 +59,69 @@ function App() {
     setIsLoading(true);
     fetch(`/api/images?name=${searchQuery}`, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
-       .then(r => {
+      .then((r) => {
         if (!r.ok) {
-            setHasError(true);
-            return;
+          setHasError(true);
+          return;
         }
         r.json().then((data) => {
-            if (id === reqId.current) {
-                setImageData(data)
-
-            }
-        })
-    }).then(() => {
-      setHasError(false)
-    }
-    ).catch(() => {
-      setHasError(true)
-    }).finally(() => {
-      setIsLoading(false);
-    })
-
-}
-const searchPanel = <ImageSearchForm searchString={searchQuery} onSearchStringChange={setSearchQuery} onSearchRequested={handleImageSearch}/>
-
-    function handleNameChange(updatedData: IApiImageData[]){
-      setImageData([...updatedData])
-    }
-
-    useEffect(() => {
-      if (!token) return;
-
-      fetch("/api/images", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setImageData(data);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          setHasError(true);
-          setIsLoading(false);
-          console.error("Failed to fetch images:", err);
+          if (id === reqId.current) {
+            setImageData(data);
+          }
         });
-    }, [token]);
-    
+      })
+      .then(() => {
+        setHasError(false);
+      })
+      .catch(() => {
+        setHasError(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+  const searchPanel = (
+    <ImageSearchForm
+      searchString={searchQuery}
+      onSearchStringChange={setSearchQuery}
+      onSearchRequested={handleImageSearch}
+    />
+  );
 
-  // Inside your App component:
+  function handleNameChange(updatedData: IApiImageData[]) {
+    setImageData([...updatedData]);
+  }
+
+  useEffect(() => {
+    if (!token) return;
+
+    fetch("/api/images", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setImageData(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setHasError(true);
+        setIsLoading(false);
+        console.error("Failed to fetch images:", err);
+      });
+  }, [token]);
+
   const navigate = useNavigate();
 
   function handleSetToken(newToken: string) {
     setToken(newToken);
-    fetchImages(newToken);   
+    fetchImages(newToken);
     navigate("/");
   }
-  
 
   return (
     <Routes>
@@ -127,39 +129,46 @@ const searchPanel = <ImageSearchForm searchString={searchQuery} onSearchStringCh
         <Route
           index
           element={
-            <ProtectedRoute authToken={token} >
-            <AllImages
-              images={imageData}
-              isLoading={isLoading}
-              hasError={hasError}
-              searchPanel={searchPanel}
-            />
+            <ProtectedRoute authToken={token}>
+              <AllImages
+                images={imageData}
+                isLoading={isLoading}
+                hasError={hasError}
+                searchPanel={searchPanel}
+              />
             </ProtectedRoute>
           }
         />
-        <Route path={ValidRoutes.UPLOAD} element={
-          <ProtectedRoute authToken={token} >
-          <UploadPage authToken={token}/>
+        <Route
+          path={ValidRoutes.UPLOAD}
+          element={
+            <ProtectedRoute authToken={token}>
+              <UploadPage authToken={token} />
             </ProtectedRoute>
-        } />
-        <Route path={ValidRoutes.LOGIN} element={
-          <LoginPage isRegistering={false} addToken={handleSetToken}/>
-        } />
-        <Route path={ValidRoutes.REGISTER} element={
-          <LoginPage isRegistering={true} addToken={handleSetToken}/>
-        } />
+          }
+        />
+        <Route
+          path={ValidRoutes.LOGIN}
+          element={
+            <LoginPage isRegistering={false} addToken={handleSetToken} />
+          }
+        />
+        <Route
+          path={ValidRoutes.REGISTER}
+          element={<LoginPage isRegistering={true} addToken={handleSetToken} />}
+        />
         <Route
           path={`${ValidRoutes.IMAGES}/:id`}
           element={
-            <ProtectedRoute authToken={token} >
-            <ImageDetails
-              images={imageData}
-              isLoading={isLoading}
-              hasError={hasError}
-              handleChange={handleNameChange}
-              token={token}
+            <ProtectedRoute authToken={token}>
+              <ImageDetails
+                images={imageData}
+                isLoading={isLoading}
+                hasError={hasError}
+                handleChange={handleNameChange}
+                token={token}
               />
-              </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
       </Route>

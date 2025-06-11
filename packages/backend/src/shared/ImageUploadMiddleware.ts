@@ -5,7 +5,7 @@ class ImageFormatError extends Error {}
 
 const storageEngine = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = process.env.IMAGE_UPLOAD_DIR || "uploads"; // fallback to uploads
+        const uploadDir = process.env.IMAGE_UPLOAD_DIR || "uploads"; 
         cb(null, uploadDir);
     },
     

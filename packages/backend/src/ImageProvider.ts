@@ -15,7 +15,6 @@ interface IUserDocument {
 
 export class ImageProvider {
   private imageCollection: Collection<IImageDocument>;
-  private userCollection: Collection<IUserDocument>;
 
   constructor(private readonly mongoClient: MongoClient) {
     const imagesName = process.env.IMAGES_COLLECTION_NAME;
@@ -28,9 +27,6 @@ export class ImageProvider {
     this.imageCollection = this.mongoClient
       .db()
       .collection<IImageDocument>(imagesName);
-    this.userCollection = this.mongoClient
-      .db()
-      .collection<IUserDocument>(usersName);
   }
 
   async getAllImages(search?: string) {
@@ -64,7 +60,9 @@ export class ImageProvider {
   async checkOwner(user: IAuthTokenPayload, imageId: string) {
     console.log(user.username);
 
-    const result = await this.imageCollection.findOne({ _id: new ObjectId(imageId) });
+    const result = await this.imageCollection.findOne({
+      _id: new ObjectId(imageId),
+    });
     if (result) {
       if (result.authorId === user.username) {
         return true;

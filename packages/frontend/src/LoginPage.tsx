@@ -13,10 +13,7 @@ export function LoginPage(props: ILoginPageProps) {
   const navigate = useNavigate();
 
   const [result, submitAction, isPending] = React.useActionState(
-    async (
-      _prev: { status: number; message: string },
-      formData: FormData
-    ) => {
+    async (_prev: { status: number; message: string }, formData: FormData) => {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
 

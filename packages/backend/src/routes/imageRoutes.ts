@@ -1,7 +1,10 @@
 import express, { Request, Response } from "express";
 import { ImageProvider } from "../ImageProvider";
 import { ObjectId } from "mongodb";
-import { imageMiddlewareFactory, handleImageFileErrors } from "../shared/ImageUploadMiddleware";
+import {
+  imageMiddlewareFactory,
+  handleImageFileErrors,
+} from "../shared/ImageUploadMiddleware";
 
 export function registerImageRoutes(
   app: express.Application,
@@ -80,7 +83,7 @@ export function registerImageRoutes(
         });
         return;
       }
-  
+
       const count = await imageProvider.updateImageName(imageId, newName);
       if (count === 0) {
         res.status(404).send({
@@ -101,25 +104,23 @@ export function registerImageRoutes(
     imageMiddlewareFactory.single("image"),
     handleImageFileErrors,
     (req: Request, res: Response) => {
-        if (!req.file) {
-            res.status(400).send("File Not Found")
-            return;
-        }
-        if (!req.body) {
-            res.status(400).send("File Text Not Found")
-            return;
-        }
-        if (req.user) {
-            imageProvider.createImage(req.file.filename,req.body.name,req.user)
-                .then((success) => {
-                    if(success){
-                        res.status(201).send("Success")
-                    } else res.status(400).send("File Upload Failed")
-                })
-            
-        }
+      if (!req.file) {
+        res.status(400).send("File Not Found");
+        return;
+      }
+      if (!req.body) {
+        res.status(400).send("File Text Not Found");
+        return;
+      }
+      if (req.user) {
+        imageProvider
+          .createImage(req.file.filename, req.body.name, req.user)
+          .then((success) => {
+            if (success) {
+              res.status(201).send("Success");
+            } else res.status(400).send("File Upload Failed");
+          });
+      }
     }
-);
-
-  
+  );
 }
