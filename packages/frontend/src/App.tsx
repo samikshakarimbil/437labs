@@ -116,7 +116,7 @@ const searchPanel = <ImageSearchForm searchString={searchQuery} onSearchStringCh
 
   function handleSetToken(newToken: string) {
     setToken(newToken);
-    fetchImages(newToken);     // ⬅ Re-fetch now that we're logged in
+    fetchImages(newToken);   
     navigate("/");
   }
   
