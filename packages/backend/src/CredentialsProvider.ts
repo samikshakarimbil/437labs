@@ -39,9 +39,7 @@ export class CredentialsProvider {
         if (userDB) {
             const hashedDBpass = userDB.password
 
-            console.log(plaintextPassword)
             const verified = await bcrypt.compare(plaintextPassword, hashedDBpass);
-            console.log(verified)
             return verified
 
         } else return false

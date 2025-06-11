@@ -21,7 +21,7 @@ export function ImageNameEditor(props: INameEditorProps) {
       const updateResponse = await fetch(
         `/api${ValidRoutes.IMAGES}/${props.imageId}`,
         {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${props.token}`,

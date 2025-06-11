@@ -46,7 +46,8 @@ export function registerAuthRoutes(
       return;
     }
 
-    res.status(201).end();
+    const token = await generateAuthToken(username, req.app.locals.JWT_SECRET);
+    res.send(token);
   });
 
   app.post("/auth/login", async (req, res) => {
@@ -66,7 +67,6 @@ export function registerAuthRoutes(
         req.app.locals.JWT_SECRET
       );
       res.send(token);
-    } 
-    else res.status(401).send("Incorrect Username or password");
+    } else res.status(401).send("Incorrect Username or password");
   });
 }

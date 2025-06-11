@@ -58,8 +58,6 @@ export class ImageProvider {
   }
 
   async checkOwner(user: IAuthTokenPayload, imageId: string) {
-    console.log(user.username);
-
     const result = await this.imageCollection.findOne({
       _id: new ObjectId(imageId),
     });

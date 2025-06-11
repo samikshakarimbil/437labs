@@ -1,6 +1,6 @@
 import React from "react";
 import "./LoginPage.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface ILoginPageProps {
   isRegistering: boolean;
@@ -10,7 +10,6 @@ interface ILoginPageProps {
 export function LoginPage(props: ILoginPageProps) {
   const usernameInputId = React.useId();
   const passwordInputId = React.useId();
-  const navigate = useNavigate();
 
   const [result, submitAction, isPending] = React.useActionState(
     async (_prev: { status: number; message: string }, formData: FormData) => {
@@ -34,8 +33,6 @@ export function LoginPage(props: ILoginPageProps) {
 
         // Pass token to parent component and redirect
         props.addToken(token);
-        navigate("/");
-
         return { status: response.status, message: "Success" };
       } catch (e) {
         return { status: 500, message: "Server error. Please try again." };

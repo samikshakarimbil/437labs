@@ -46,7 +46,7 @@ export function registerImageRoutes(
     });
   });
 
-  app.put("/api/images/:id", express.json(), async (req, res) => {
+  app.patch("/api/images/:id", express.json(), async (req, res) => {
     const imageId = req.params.id;
     const newName = req.body.name;
 

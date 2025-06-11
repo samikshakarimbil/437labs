@@ -123,6 +123,12 @@ function App() {
     navigate("/");
   }
 
+
+  useEffect(() => {
+    if (!token) return;
+    fetchImages(token);
+  }, [token]);
+  
   return (
     <Routes>
       <Route path={ValidRoutes.HOME} element={<MainLayout />}>
