@@ -1,7 +1,7 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { ImageProvider } from "../ImageProvider";
 import { ObjectId } from "mongodb";
-
+import { imageMiddlewareFactory, handleImageFileErrors } from "../shared/ImageUploadMiddleware";
 
 export function registerImageRoutes(
   app: express.Application,
@@ -43,7 +43,7 @@ export function registerImageRoutes(
     });
   });
 
-  app.put("/api/images/:id", express.json(), (req, res) => {
+  app.put("/api/images/:id", express.json(), async (req, res) => {
     const imageId = req.params.id;
     const newName = req.body.name;
 
@@ -71,20 +71,55 @@ export function registerImageRoutes(
       return;
     }
 
-    imageProvider
-      .updateImageName(imageId, newName)
-      .then((count) => {
-        if (count === 0) {
-          return res.status(404).send({
-            error: "Not Found",
-            message: "Image does not exist",
-          });
-        }
-        return res.status(204).send();
-      })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).send("Server error");
-      });
+    try {
+      const isOwner = await imageProvider.checkOwner(req.user!, imageId);
+      if (!isOwner) {
+        res.status(403).send({
+          error: "Forbidden",
+          message: "Cannot edit other users' image.",
+        });
+        return;
+      }
+  
+      const count = await imageProvider.updateImageName(imageId, newName);
+      if (count === 0) {
+        res.status(404).send({
+          error: "Not Found",
+          message: "Image does not exist",
+        });
+        return;
+      }
+      res.status(204).send();
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Server error");
+    }
   });
+
+  app.post(
+    "/api/images",
+    imageMiddlewareFactory.single("image"),
+    handleImageFileErrors,
+    (req: Request, res: Response) => {
+        if (!req.file) {
+            res.status(400).send("File Not Found")
+            return;
+        }
+        if (!req.body) {
+            res.status(400).send("File Text Not Found")
+            return;
+        }
+        if (req.user) {
+            imageProvider.createImage(req.file.filename,req.body.name,req.user)
+                .then((success) => {
+                    if(success){
+                        res.status(201).send("Success")
+                    } else res.status(400).send("File Upload Failed")
+                })
+            
+        }
+    }
+);
+
+  
 }

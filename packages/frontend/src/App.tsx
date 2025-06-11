@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { AllImages } from "./images/AllImages.tsx";
 import { ImageDetails } from "./images/ImageDetails.tsx";
 import { UploadPage } from "./UploadPage.tsx";
@@ -18,6 +18,14 @@ function App() {
   const [token, setToken] = useState("");
 
   const reqId = useRef(0)
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === ValidRoutes.HOME && token) {
+      fetchImages(token);
+    }
+  }, [location.pathname, token]);
 
   function fetchImages(authToken: string) {
     setIsLoading(true);
@@ -131,7 +139,7 @@ const searchPanel = <ImageSearchForm searchString={searchQuery} onSearchStringCh
         />
         <Route path={ValidRoutes.UPLOAD} element={
           <ProtectedRoute authToken={token} >
-          <UploadPage />
+          <UploadPage authToken={token}/>
             </ProtectedRoute>
         } />
         <Route path={ValidRoutes.LOGIN} element={
@@ -149,6 +157,7 @@ const searchPanel = <ImageSearchForm searchString={searchQuery} onSearchStringCh
               isLoading={isLoading}
               hasError={hasError}
               handleChange={handleNameChange}
+              token={token}
               />
               </ProtectedRoute>
           }

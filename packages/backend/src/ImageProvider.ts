@@ -2,7 +2,7 @@ import { MongoClient, Collection, ObjectId } from "mongodb";
 import type { IAuthTokenPayload } from "routes/authRoutes";
 
 interface IImageDocument {
-  _id: ObjectId;
+  _id?: ObjectId;
   src: string;
   name: string;
   authorId: string;
@@ -34,27 +34,23 @@ export class ImageProvider {
   }
 
   async getAllImages(search?: string) {
-    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
-    const images = await this.imageCollection.find(filter).toArray();
+    const query: any = {};
+    if (search && search.trim().length > 0) {
+      query.name = { $regex: search, $options: "i" };
+    }
 
-    const userIds = images.map((img) => img.authorId);
-    const users = await this.userCollection
-      .find({ _id: { $in: userIds } })
-      .toArray();
+    const images = await this.imageCollection.find(query).toArray();
 
-    const userMap = Object.fromEntries(
-      users.map((user) => [user._id.toString(), user])
-    );
-
-    // assemble final image objects with author info
-    return images.map((img) => ({
-      id: img._id.toString(),
-      src: img.src,
-      name: img.name,
+    const result = images.map((img, index) => ({
+      ...img,
+      key: img._id?.toString() ?? `${img.name}-${index}`,
       author: {
-        username: userMap[img.authorId]?.username || "Unknown",
+        username: img.authorId,
+        email: "fake@fake.com",
       },
     }));
+
+    return result;
   }
 
   async updateImageName(imageId: string, newName: string): Promise<number> {
@@ -64,13 +60,32 @@ export class ImageProvider {
     );
     return result.matchedCount;
   }
- 
-  async checkAuthor(reqUser: IAuthTokenPayload, imgId: string) {
-    const result = await this.imageCollection.findOne({ _id: new ObjectId(imgId) });
-  
-    if (!result) return false;
-  
-    return result.authorId === reqUser.username;
+
+  async checkOwner(user: IAuthTokenPayload, imageId: string) {
+    console.log(user.username);
+
+    const result = await this.imageCollection.findOne({ _id: new ObjectId(imageId) });
+    if (result) {
+      if (result.authorId === user.username) {
+        return true;
+      }
+    } else return false;
   }
-  
+
+  async createImage(
+    srcEnd: string,
+    userFileName: string,
+    reqUser: IAuthTokenPayload
+  ) {
+    const username = reqUser.username;
+    const srcFull = `/uploads/${srcEnd}`;
+    const result = await this.imageCollection.insertOne({
+      src: srcFull,
+      name: userFileName,
+      authorId: username,
+    });
+    if (result) {
+      return true;
+    } else return false;
+  }
 }

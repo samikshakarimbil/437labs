@@ -9,11 +9,12 @@ interface IImageDetailsProps {
     isLoading: boolean;
     hasError: boolean;
     handleChange: (updatedData: IApiImageData[]) => void
+    token: string;
   }
   
 export function ImageDetails(props: Readonly<IImageDetailsProps>): ReactNode{
     const { id } = useParams<{ id: string }>();
-    const image = props.images.find(image => image.id === id);
+    const image = props.images.find(image => image._id === id);
     
     if (props.isLoading) return <><p>Loading...</p></>;
     if (props.hasError) return <><p>Failed to load image.</p></>;
@@ -27,8 +28,9 @@ export function ImageDetails(props: Readonly<IImageDetailsProps>): ReactNode{
             <p>By {image.author.username}</p>
             <ImageNameEditor 
                 initialValue="" 
-                imageId={image.id} 
-                onChange={props.handleChange}/>
+                imageId={image._id} 
+                onChange={props.handleChange}
+                token={props.token}/>
             <img className="ImageDetails-img" src={image.src} alt={image.name} />
         </>
     )
