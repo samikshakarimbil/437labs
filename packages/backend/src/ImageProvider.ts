@@ -64,12 +64,13 @@ export class ImageProvider {
     );
     return result.matchedCount;
   }
+ 
   async checkAuthor(reqUser: IAuthTokenPayload, imgId: string) {
-    const result = await this.imageCollection.findOne({ id: imgId });
-    if (result) {
-      if (result.authorId === reqUser.username) {
-        return true;
-      }
-    } else return false;
+    const result = await this.imageCollection.findOne({ _id: new ObjectId(imgId) });
+  
+    if (!result) return false;
+  
+    return result.authorId === reqUser.username;
   }
+  
 }
